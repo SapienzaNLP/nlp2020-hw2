@@ -1,5 +1,10 @@
 # Do NOT upload data to GitHub!
-*.json
+data/train.json
+data/dev.json
+data/test.json
+data/test_ood.json
+
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

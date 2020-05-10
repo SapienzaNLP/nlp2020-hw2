@@ -13,15 +13,15 @@ def annotate(path):
     try:
 
         json_body = request.json
-        tokens_s = json_body['tokens_s']
-        predictions_s = model.predict(tokens_s)
+        data = json_body['data']
+        predictions = model.predict(data)
 
     except Exception as e:
 
         app.logger.error(e, exc_info=True)
         return {'error': 'Bad request', 'message': 'There was an error processing the request. Please check logs/server.stderr'}, 400
 
-    return jsonify(tokens_s=tokens_s, predictions_s=predictions_s)
+    return jsonify(data=data, predictions=predictions)
 
 
 if __name__ == '__main__':

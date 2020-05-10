@@ -3,60 +3,22 @@ import logging
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
 import argparse
+import json
+import pprint
 import requests
 import time
 
 from requests.exceptions import ConnectionError
-from sklearn.metrics import precision_score, recall_score, f1_score
 from tqdm import tqdm
 from typing import Tuple, List, Any, Dict
 
-
-def flat_list(l: List[List[Any]]) -> List[Any]:
-    return [_e for e in l for _e in e]
-
-
-def count(l: List[Any]) -> Dict[Any, int]:
-    d = {}
-    for e in l:
-        d[e] = 1 + d.get(e, 0)
-    return d
-
-
-def read_dataset(path: str) -> Tuple[List[List[str]], List[List[str]]]:
-
-    tokens_s = []
-    labels_s = []
-
-    tokens = []
-    labels = []
-
-    with open(path) as f:
-
-        for line in f:
-
-            line = line.strip()
-
-            if line.startswith('# '):
-                tokens = []
-                labels = []
-            elif line == '':
-                tokens_s.append(tokens)
-                labels_s.append(labels)
-            else:
-                _, token, label = line.split('\t')
-                tokens.append(token)
-                labels.append(label)
-
-    assert len(tokens_s) == len(labels_s)
-
-    return tokens_s, labels_s
+import utils
 
 
 def main(test_path: str, endpoint: str, batch_size=32):
 
     try:
-        tokens_s, labels_s = read_dataset(test_path)
+        dataset = utils.read_dataset(test_path)
     except FileNotFoundError as e:
         logging.error(f'Evaluation crashed because {test_path} does not exist')
         exit(1)
@@ -83,8 +45,8 @@ def main(test_path: str, endpoint: str, batch_size=32):
         time.sleep(10)
 
         try:
-            response = requests.post(endpoint, json={'tokens_s': [['My', 'name', 'is', 'Robin', 'Hood']]}).json()
-            response['predictions_s']
+            response = requests.post(endpoint, json={'data': dataset['0']}).json()
+            response['predictions']
             logging.info('Connection succeded')
             break
         except ConnectionError as e:
@@ -95,43 +57,33 @@ def main(test_path: str, endpoint: str, batch_size=32):
             logging.error(e, exc_info=True)
             exit(1)
 
-    predictions_s = []
+    predictions = {}
 
-    progress_bar = tqdm(total=len(tokens_s), desc='Evaluating')
+    progress_bar = tqdm(total=len(dataset), desc='Evaluating')
 
-    for i in range(0, len(tokens_s), batch_size):
-        batch = tokens_s[i: i + batch_size]
+    for sentence_id in dataset:
+        sentence = dataset[sentence_id]
         try:
-            response = requests.post(endpoint, json={'tokens_s': batch}).json()
-            predictions_s += response['predictions_s']
+            response = requests.post(endpoint, json={'data': sentence}).json()
+            predictions[sentence_id] = response['predictions']
         except KeyError as e:
             logging.error(f'Server response in wrong format')
             logging.error(f'Response was: {response}')
             logging.error(e, exc_info=True)
             exit(1)
-        progress_bar.update(len(batch))
+        progress_bar.update(1)
 
     progress_bar.close()
 
-    flat_labels_s = flat_list(labels_s)
-    flat_predictions_s = flat_list(predictions_s)
+    predicate_identification_results = utils.evaluate_predicate_identification(dataset, predictions)
+    predicate_disambiguation_results = utils.evaluate_predicate_disambiguation(dataset, predictions)
+    argument_identification_results = utils.evaluate_argument_identification(dataset, predictions)
+    argument_classification_results = utils.evaluate_argument_classification(dataset, predictions)
 
-    label_distribution = count(flat_labels_s)
-    pred_distribution = count(flat_predictions_s)
-
-    print(f'# instances: {len(flat_list(labels_s))}')
-
-    keys = set(label_distribution.keys()) | set(pred_distribution.keys())
-    for k in keys:
-        print(f'\t# {k}: ({label_distribution.get(k, 0)}, {pred_distribution.get(k, 0)})')
-
-    p = precision_score(flat_labels_s, flat_predictions_s, average='macro')
-    r = recall_score(flat_labels_s, flat_predictions_s, average='macro')
-    f = f1_score(flat_labels_s, flat_predictions_s, average='macro')
-
-    print(f'# precision: {p:.4f}')
-    print(f'# recall: {r:.4f}')
-    print(f'# f1: {f:.4f}')
+    print(utils.print_table('predicate identification', predicate_identification_results))
+    print(utils.print_table('predicate disambiguation', predicate_disambiguation_results))
+    print(utils.print_table('argument identification', argument_identification_results))
+    print(utils.print_table('argument classification', argument_classification_results))
 
 
 if __name__ == '__main__':

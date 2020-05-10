@@ -1,3 +1,6 @@
+import json
+import random
+
 import numpy as np
 from typing import List, Tuple
 
@@ -7,26 +10,57 @@ from model import Model
 def build_model(device: str) -> Model:
     # STUDENT: return StudentModel()
     # STUDENT: your model MUST be loaded on the device "device" indicates
-    return RandomBaseline()
+    return Baseline()
 
 
-class RandomBaseline(Model):
-
-    options = [
-        ('LOC', 98412),
-        ('O', 2512990),
-        ('ORG', 71633),
-        ('PER', 115758)
-    ]
+class Baseline(Model):
 
     def __init__(self):
+        self.baselines = Baseline._load_baselines()
 
-        self._options = [option[0] for option in self.options]
-        self._weights = np.array([option[1] for option in self.options])
-        self._weights = self._weights / self._weights.sum()
+    def predict(self, sentence):
+        predicate_identification = []
+        for pos in sentence['pos_tags']:
+            prob = self.baselines['predicate_identification'][pos]['positive'] / self.baselines['predicate_identification'][pos]['total']
+            if random.random() < prob:
+                predicate_identification.append(True)
+            else:
+                predicate_identification.append(False)
+        
+        predicate_disambiguation = []
+        num_predicates = 0
+        for lemma, is_predicate in zip(sentence['lemmas'], predicate_identification):
+            if not is_predicate or lemma not in self.baselines['predicate_disambiguation']:
+                predicate_disambiguation.append('_')
+            else:
+                predicate_disambiguation.append(self.baselines['predicate_disambiguation'][lemma])
+                num_predicates += 1
+        
+        argument_identification = []
+        for dependency_relation in sentence['dependency_relations']:
+            prob = self.baselines['argument_identification'][dependency_relation]['positive'] / self.baselines['argument_identification'][dependency_relation]['total']
+            if random.random() < prob:
+                argument_identification.append(True)
+            else:
+                argument_identification.append(False)
 
-    def predict(self, tokens: List[List[str]]) -> List[List[str]]:
-        return [[str(np.random.choice(self._options, 1, p=self._weights)[0]) for _x in x] for x in tokens]
+        argument_classification = []
+        for dependency_relation, is_argument in zip(sentence['dependency_relations'], argument_identification):
+            if not is_argument:
+                argument_classification.append('_')
+            else:
+                argument_classification.append(self.baselines['argument_classification'][dependency_relation])
+        
+        return {
+            'predicates': predicate_disambiguation,
+            'roles': [argument_classification] * num_predicates,
+        }
+
+    @staticmethod
+    def _load_baselines(path='data/baselines.json'):
+        with open(path) as baselines_file:
+            baselines = json.load(baselines_file)
+        return baselines
 
 
 class StudentModel(Model):

@@ -14,6 +14,7 @@ COPY model model
 # copy code
 
 COPY hw2 hw2
+COPY data/baselines.json data/baselines.json
 ENV PYTHONPATH hw2
 
 # standard cmd
