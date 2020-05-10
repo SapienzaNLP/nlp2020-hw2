@@ -42,8 +42,8 @@ Your model will be exposed through a REST server. In order to call it, we need a
 (the evaluation script) but it needs some dependecies to run. We will be using conda to create the environment for this client.
 
 ```
-conda create -n nlp2020-hw1 python=3.7
-conda activate nlp2020-hw1
+conda create -n nlp2020-hw2 python=3.7
+conda activate nlp2020-hw2
 pip install -r requirements.txt
 ```
 
@@ -52,11 +52,11 @@ pip install -r requirements.txt
 *test.sh* is a simple bash script. To run it:
 
 ```
-conda activate nlp2020-hw1
-bash test.sh data/dev.tsv
+conda activate nlp2020-hw2
+bash test.sh data/dev.json
 ```
 
-Actually, you can replace *data/dev.tsv* to point to a different file, as far as the target file has the same format.
+Actually, you can replace *data/dev.json* to point to a different file, as far as the target file has the same format.
 
-If you hadn't changed *hw1/stud/model.py* yet when you run test.sh, the scores you just saw describe how a random baseline
-behaves. To have *test.sh* evaluate your model, follow the instructions in the slide.
+If you hadn't changed *hw2/stud/model.py* yet when you run test.sh, the scores you just saw describe how a random baseline
+behaves. To have *test.sh* evaluate your model, follow the instructions in the slides.
