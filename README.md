@@ -1,4 +1,4 @@
-# nlp2020-hw1
+# nlp2020-hw2
 
 **NOTE:** Unless otherwise stated, all commands here are expected to be run from the root directory of this project
 
