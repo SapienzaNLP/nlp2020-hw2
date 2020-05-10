@@ -1,37 +1,46 @@
 #!/bin/bash
 
+set -e
+
 # initial check
 
-if [ "$#" != 1 ]; then
-    echo "$# parameters given. Only 1 expected. Use -h to view command format"
+if [ "$#" -lt 1 ]; then
+    echo "$# parameters given. At least 1 parameter is expected. Use -h to view command format"
+    exit 1
+fi
+
+if [ "$#" -gt 3 ]; then
+    echo "$# parameters given. At most 3 parameters are expected. Use -h to view command format"
     exit 1
 fi
 
 if [ "$1" == "-h" ]; then
-  echo "Usage: `basename $0` [file to evaluate upon]"
+  echo "Usage: `basename $0` <file to evaluate upon> [<image name>, <evaluation script>]"
   exit 1
 fi
 
 test_path=$1
+image_name=${2:-nlp2020-hw2}
+evaluation_script=${3:-hw2/evaluate.py}
 
 # delete old docker if exists
-docker ps -q --filter "name=nlp2020-hw2" | grep -q . && docker stop nlp2020-hw2
-docker ps -aq --filter "name=nlp2020-hw2" | grep -q . && docker rm nlp2020-hw2
+docker ps -q --filter "name=$image_name" | grep -q . && docker stop $image_name
+docker ps -aq --filter "name=$image_name" | grep -q . && docker rm $image_name
 
 # build docker file
-docker build . -f Dockerfile -t nlp2020-hw2
+docker build . -f Dockerfile -t $image_name
 
 # bring model up
-docker run -d -p 12345:12345 --name nlp2020-hw2 nlp2020-hw2
+docker run -d -p 12345:12345 --name $image_name $image_name
 
 # perform evaluation
-/usr/bin/env python hw2/evaluate.py $test_path
+/usr/bin/env python $evaluation_script $test_path
 
 # stop container
-docker stop nlp2020-hw2
+docker stop $image_name
 
 # dump container logs
-docker logs -t nlp2020-hw2 > logs/server.stdout 2> logs/server.stderr
+docker logs -t $image_name > logs/server.stdout 2> logs/server.stderr
 
 # remove container
-docker rm nlp2020-hw2
+docker rm $image_name
