@@ -21,16 +21,23 @@ class Model:
                     ["ADV", "NMOD", "PMOD", "P", "TITLE", "SBJ", "COORD", "NMOD", "CONJ", "ROOT", "OBJ", "NMOD", "NMOD", "SBJ", "NMOD", "PMOD", "NMOD", "NMOD", "OBJ", "SUB", "TMP", "VC", "VC", "P"],
                 "predicates":
                     ["_", "_", "_", "_", "_", "_", "_", "_", "_", "AFFIRM", "_", "_", "_", "_", "_", "REDUCE_DIMINISH", "_", "_", "_", "_", "_", "_", "MOUNT_ASSEMBLE_PRODUCE", "_" ],
-                "roles": [
-                    [ "Connective", "_", "_", "_", "_", "Agent", "_", "_", "_", "_", "Theme", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_" ],
-                    [ "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "Patient", "_", "_", "_", "_", "_" ],
-                    [ "_", "_", "_", "_", "_",  "_",  "_",  "_",  "_",  "_",  "_",  "_",  "_",  "Product",  "_",  "_",  "_",  "_",  "_",  "_",  "Time",  "_",  "_",  "_"  ]
-                ],
             },
 
         Returns:
-            sentence: the very same input dictionary except for some fields.
-                - If you are just doing argument identification and classification, replace the "roles" field with your predictions.
-                - If you are also doing predicate identification and disambiguation, replace the "predicates" field with your predictions.
+            A dictionary with your predictions:
+                - If you are argument identification + argument classification:
+                    {
+                        "roles": list of lists, # A list of roles for each predicate in the sentence. 
+                    }
+                - If you are doing predicate disambiguation + argument identification + argument classification:
+                    {
+                        "predicates": list, # A list of predicate senses, one for each token in the sentence, null ("_") included.
+                        "roles": list of lists, # A list of roles for each PRE-IDENTIFIED predicate in the sentence. 
+                    }
+                - If you are doing predicate identification + predicate disambiguation + argument identification + argument classification:
+                    {
+                        "predicates": list, # A list of predicate senses, one for each token in the sentence, null ("_") included.
+                        "roles": list of lists, # A list of roles for each predicate you identify in the sentence. 
+                    }
         """
         raise NotImplementedError

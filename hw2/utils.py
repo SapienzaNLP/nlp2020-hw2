@@ -4,14 +4,31 @@ def read_dataset(path: str):
 
     with open(path) as f:
         dataset = json.load(f)
+    
+    sentences, labels = {}, {}
+    for sentence_id, sentence in dataset.items():
+        sentence_id = int(sentence_id)
+        sentences[sentence_id] = {
+            'words': sentence['words'],
+            'lemmas': sentence['lemmas'],
+            'pos_tags': sentence['pos_tags'],
+            'dependency_heads': [int(head) for head in sentence['dependency_heads']],
+            'dependency_relations': sentence['dependency_relations'],
+            'predicates': sentence['predicates'],
+        }
 
-    return dataset
+        labels[sentence_id] = {
+            'predicates': sentence['predicates'],
+            'roles': sentence['roles']
+        }
+
+    return sentences, labels
 
 
-def evaluate_predicate_identification(dataset, predictions, null_tag='_'):
+def evaluate_predicate_identification(labels, predictions, null_tag='_'):
     true_positives, false_positives, false_negatives = 0, 0, 0
-    for sentence_id in dataset:
-        gold_predicates = dataset[sentence_id]['predicates']
+    for sentence_id in labels:
+        gold_predicates = labels[sentence_id]['predicates']
         pred_predicates = predictions[sentence_id]['predicates']
         for g, p in zip(gold_predicates, pred_predicates):
             if g != null_tag and p != null_tag:
@@ -33,10 +50,10 @@ def evaluate_predicate_identification(dataset, predictions, null_tag='_'):
     }
 
 
-def evaluate_predicate_disambiguation(dataset, predictions, null_tag='_'):
+def evaluate_predicate_disambiguation(labels, predictions, null_tag='_'):
     true_positives, false_positives, false_negatives = 0, 0, 0
-    for sentence_id in dataset:
-        gold_predicates = dataset[sentence_id]['predicates']
+    for sentence_id in labels:
+        gold_predicates = labels[sentence_id]['predicates']
         pred_predicates = predictions[sentence_id]['predicates']
         for g, p in zip(gold_predicates, pred_predicates):
             if g != null_tag and p != null_tag:
@@ -62,19 +79,19 @@ def evaluate_predicate_disambiguation(dataset, predictions, null_tag='_'):
     }
 
 
-def evaluate_argument_identification(dataset, predictions, null_tag='_'):
+def evaluate_argument_identification(labels, predictions, null_tag='_'):
     true_positives, false_positives, false_negatives = 0, 0, 0
-    for sentence_id in dataset:
-        gold_predicates = dataset[sentence_id]['predicates']
+    for sentence_id in labels:
+        gold_predicates = labels[sentence_id]['predicates']
         pred_predicates = predictions[sentence_id]['predicates']
         g_idx, p_idx = 0, 0
         for g, p in zip(gold_predicates, pred_predicates):
             if g != null_tag and p == null_tag:
-                false_negatives += sum(1 for role in dataset[sentence_id]['roles'][g_idx] if role != null_tag)
+                false_negatives += sum(1 for role in labels[sentence_id]['roles'][g_idx] if role != null_tag)
             elif g == null_tag and p != null_tag:
                 false_positives += sum(1 for role in predictions[sentence_id]['roles'][p_idx] if role != null_tag)
             elif g != null_tag and p != null_tag:
-                for r_g, r_p in zip(dataset[sentence_id]['roles'][g_idx], predictions[sentence_id]['roles'][p_idx]):
+                for r_g, r_p in zip(labels[sentence_id]['roles'][g_idx], predictions[sentence_id]['roles'][p_idx]):
                     if r_g != null_tag and r_p != null_tag:
                         true_positives += 1
                     elif r_g != null_tag and r_p == null_tag:
@@ -98,19 +115,19 @@ def evaluate_argument_identification(dataset, predictions, null_tag='_'):
     }
 
 
-def evaluate_argument_classification(dataset, predictions, null_tag='_'):
+def evaluate_argument_classification(labels, predictions, null_tag='_'):
     true_positives, false_positives, false_negatives = 0, 0, 0
-    for sentence_id in dataset:
-        gold_predicates = dataset[sentence_id]['predicates']
+    for sentence_id in labels:
+        gold_predicates = labels[sentence_id]['predicates']
         pred_predicates = predictions[sentence_id]['predicates']
         g_idx, p_idx = 0, 0
         for g, p in zip(gold_predicates, pred_predicates):
             if g != null_tag and p == null_tag:
-                false_negatives += sum(1 for role in dataset[sentence_id]['roles'][g_idx] if role != null_tag)
+                false_negatives += sum(1 for role in labels[sentence_id]['roles'][g_idx] if role != null_tag)
             elif g == null_tag and p != null_tag:
                 false_positives += sum(1 for role in predictions[sentence_id]['roles'][p_idx] if role != null_tag)
             elif g != null_tag and p != null_tag:
-                for r_g, r_p in zip(dataset[sentence_id]['roles'][g_idx], predictions[sentence_id]['roles'][p_idx]):
+                for r_g, r_p in zip(labels[sentence_id]['roles'][g_idx], predictions[sentence_id]['roles'][p_idx]):
                     if r_g != null_tag and r_p != null_tag:
                         if r_g == r_p:
                             true_positives += 1

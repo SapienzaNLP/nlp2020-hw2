@@ -15,10 +15,10 @@ from typing import Tuple, List, Any, Dict
 import utils
 
 
-def main(test_path: str, endpoint: str, batch_size=32):
+def main(test_path: str, endpoint: str):
 
     try:
-        dataset = utils.read_dataset(test_path)
+        sentences, labels = utils.read_dataset(test_path)
     except FileNotFoundError as e:
         logging.error(f'Evaluation crashed because {test_path} does not exist')
         exit(1)
@@ -45,7 +45,7 @@ def main(test_path: str, endpoint: str, batch_size=32):
         time.sleep(10)
 
         try:
-            response = requests.post(endpoint, json={'data': dataset['0']}).json()
+            response = requests.post(endpoint, json={'data': sentences[0]}).json()
             response['predictions']
             logging.info('Connection succeded')
             break
@@ -59,10 +59,10 @@ def main(test_path: str, endpoint: str, batch_size=32):
 
     predictions = {}
 
-    progress_bar = tqdm(total=len(dataset), desc='Evaluating')
+    progress_bar = tqdm(total=len(sentences), desc='Evaluating')
 
-    for sentence_id in dataset:
-        sentence = dataset[sentence_id]
+    for sentence_id in sentences:
+        sentence = sentences[sentence_id]
         try:
             response = requests.post(endpoint, json={'data': sentence}).json()
             predictions[sentence_id] = response['predictions']
@@ -75,13 +75,14 @@ def main(test_path: str, endpoint: str, batch_size=32):
 
     progress_bar.close()
 
-    predicate_identification_results = utils.evaluate_predicate_identification(dataset, predictions)
-    predicate_disambiguation_results = utils.evaluate_predicate_disambiguation(dataset, predictions)
-    argument_identification_results = utils.evaluate_argument_identification(dataset, predictions)
-    argument_classification_results = utils.evaluate_argument_classification(dataset, predictions)
+    if 'predicates' in predictions[0]:
+        predicate_identification_results = utils.evaluate_predicate_identification(labels, predictions)
+        predicate_disambiguation_results = utils.evaluate_predicate_disambiguation(labels, predictions)
+        print(utils.print_table('predicate identification', predicate_identification_results))
+        print(utils.print_table('predicate disambiguation', predicate_disambiguation_results))
 
-    print(utils.print_table('predicate identification', predicate_identification_results))
-    print(utils.print_table('predicate disambiguation', predicate_disambiguation_results))
+    argument_identification_results = utils.evaluate_argument_identification(labels, predictions)
+    argument_classification_results = utils.evaluate_argument_classification(labels, predictions)
     print(utils.print_table('argument identification', argument_identification_results))
     print(utils.print_table('argument classification', argument_classification_results))
 
