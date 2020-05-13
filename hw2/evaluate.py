@@ -68,10 +68,13 @@ def main(test_path: str, endpoint: str):
         try:
             response = requests.post(endpoint, json={'data': sentence}).json()
             predictions_34[sentence_id] = response['predictions_34']
-            if response['prediction_234']:
+            predictions_34[sentence_id]['roles'] = {int(i): p for i, p in predictions_34[sentence_id]['roles'].items()}
+            if response['predictions_234']:
                 predictions_234[sentence_id] = response['predictions_234']
+                predictions_234[sentence_id]['roles'] = {int(i): p for i, p in predictions_234[sentence_id]['roles'].items()}
             if response['predictions_1234']:
-                predictions_1234['predictions_1234'] = response['predictions_1234']
+                predictions_1234[sentence_id] = response['predictions_1234']
+                predictions_1234[sentence_id]['roles'] = {int(i): p for i, p in predictions_1234[sentence_id]['roles'].items()}
         except KeyError as e:
             logging.error(f'Server response in wrong format')
             logging.error(f'Response was: {response}')

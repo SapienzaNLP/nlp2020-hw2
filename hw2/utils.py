@@ -1,5 +1,6 @@
 import json
 
+
 def read_dataset(path: str):
 
     with open(path) as f:
@@ -19,7 +20,7 @@ def read_dataset(path: str):
 
         labels[sentence_id] = {
             'predicates': sentence['predicates'],
-            'roles': sentence['roles']
+            'roles': {int(p): r for p, r in sentence['roles'].items()}
         }
 
     return sentences, labels
@@ -82,26 +83,23 @@ def evaluate_predicate_disambiguation(labels, predictions, null_tag='_'):
 def evaluate_argument_identification(labels, predictions, null_tag='_'):
     true_positives, false_positives, false_negatives = 0, 0, 0
     for sentence_id in labels:
-        gold_predicates = labels[sentence_id]['predicates']
-        pred_predicates = predictions[sentence_id]['predicates']
-        g_idx, p_idx = 0, 0
-        for g, p in zip(gold_predicates, pred_predicates):
-            if g != null_tag and p == null_tag:
-                false_negatives += sum(1 for role in labels[sentence_id]['roles'][g_idx] if role != null_tag)
-            elif g == null_tag and p != null_tag:
-                false_positives += sum(1 for role in predictions[sentence_id]['roles'][p_idx] if role != null_tag)
-            elif g != null_tag and p != null_tag:
-                for r_g, r_p in zip(labels[sentence_id]['roles'][g_idx], predictions[sentence_id]['roles'][p_idx]):
+        gold = labels[sentence_id]['roles']
+        pred = predictions[sentence_id]['roles']
+        predicate_indices = set(gold.keys()).union(pred.keys())
+        for idx in predicate_indices:
+            if idx in gold and idx not in pred:
+                false_negatives += sum(1 for role in gold[idx] if role != null_tag)
+            elif idx in pred and idx not in gold:
+                false_positives += sum(1 for role in pred[idx] if role != null_tag)
+            else: # idx in both gold and pred
+                for r_g, r_p in zip(gold[idx], pred[idx]):
                     if r_g != null_tag and r_p != null_tag:
                         true_positives += 1
                     elif r_g != null_tag and r_p == null_tag:
                         false_negatives += 1
                     elif r_g == null_tag and r_p != null_tag:
                         false_positives += 1
-            if g != null_tag:
-                g_idx += 1
-            if p != null_tag:
-                p_idx += 1
+
     precision = true_positives / (true_positives + false_positives)
     recall = true_positives / (true_positives + false_negatives)
     f1 = 2 * (precision * recall) / (precision + recall)
@@ -118,16 +116,17 @@ def evaluate_argument_identification(labels, predictions, null_tag='_'):
 def evaluate_argument_classification(labels, predictions, null_tag='_'):
     true_positives, false_positives, false_negatives = 0, 0, 0
     for sentence_id in labels:
-        gold_predicates = labels[sentence_id]['predicates']
-        pred_predicates = predictions[sentence_id]['predicates']
-        g_idx, p_idx = 0, 0
-        for g, p in zip(gold_predicates, pred_predicates):
-            if g != null_tag and p == null_tag:
-                false_negatives += sum(1 for role in labels[sentence_id]['roles'][g_idx] if role != null_tag)
-            elif g == null_tag and p != null_tag:
-                false_positives += sum(1 for role in predictions[sentence_id]['roles'][p_idx] if role != null_tag)
-            elif g != null_tag and p != null_tag:
-                for r_g, r_p in zip(labels[sentence_id]['roles'][g_idx], predictions[sentence_id]['roles'][p_idx]):
+        gold = labels[sentence_id]['roles']
+        pred = predictions[sentence_id]['roles']
+        predicate_indices = set(gold.keys()).union(pred.keys())
+
+        for idx in predicate_indices:
+            if idx in gold and idx not in pred:
+                false_negatives += sum(1 for role in gold[idx] if role != null_tag)
+            elif idx in pred and idx not in gold:
+                false_positives += sum(1 for role in pred[idx] if role != null_tag)
+            else: # idx in both gold and pred
+                for r_g, r_p in zip(gold[idx], pred[idx]):
                     if r_g != null_tag and r_p != null_tag:
                         if r_g == r_p:
                             true_positives += 1
@@ -138,10 +137,7 @@ def evaluate_argument_classification(labels, predictions, null_tag='_'):
                         false_negatives += 1
                     elif r_g == null_tag and r_p != null_tag:
                         false_positives += 1
-            if g != null_tag:
-                g_idx += 1
-            if p != null_tag:
-                p_idx += 1
+                        
     precision = true_positives / (true_positives + false_positives)
     recall = true_positives / (true_positives + false_negatives)
     f1 = 2 * (precision * recall) / (precision + recall)
@@ -154,6 +150,7 @@ def evaluate_argument_classification(labels, predictions, null_tag='_'):
         'f1': f1
     }
 
+
 def _get_table_line(a, b, c):
     if isinstance(b, float):
         b = '{:0.2f}'.format(b)
@@ -162,6 +159,7 @@ def _get_table_line(a, b, c):
 
     line = '{:^20}|{:^20}|{:^20}'.format(a, b, c)
     return line
+
 
 def print_table(title, results):
     header = _get_table_line('', 'Gold Positive', 'Gold Negative')

@@ -67,13 +67,13 @@ class Baseline(Model):
                 predicate_identification.append(False)
         
         predicate_disambiguation = []
-        num_predicates = 0
-        for lemma, is_predicate in zip(sentence['lemmas'], predicate_identification):
+        predicate_indices = []
+        for idx, (lemma, is_predicate) in enumerate(zip(sentence['lemmas'], predicate_identification)):
             if not is_predicate or lemma not in self.baselines['predicate_disambiguation']:
                 predicate_disambiguation.append('_')
             else:
                 predicate_disambiguation.append(self.baselines['predicate_disambiguation'][lemma])
-                num_predicates += 1
+                predicate_indices.append(idx)
         
         argument_identification = []
         for dependency_relation in sentence['dependency_relations']:
@@ -92,7 +92,7 @@ class Baseline(Model):
         
         return {
             'predicates': predicate_disambiguation,
-            'roles': [argument_classification] * num_predicates,
+            'roles': {i: argument_classification for i in predicate_indices},
         }
 
     @staticmethod
