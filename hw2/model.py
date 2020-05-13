@@ -27,12 +27,13 @@ class Model:
             A dictionary with your predictions:
                 - If you are argument identification + argument classification:
                     {
+                        "predicates": list, # The SAME list of "predicates" in the input sentence dictionary.
                         "roles": list of lists, # A list of roles for each predicate in the sentence. 
                     }
                 - If you are doing predicate disambiguation + argument identification + argument classification:
                     {
-                        "predicates": list, # A list of predicate senses, one for each token in the sentence, null ("_") included.
-                        "roles": list of lists, # A list of roles for each PRE-IDENTIFIED predicate in the sentence. 
+                        "predicates": list, # A list with your predicted predicate senses, one for each token in the input sentence.
+                        "roles": list of lists, # A list of roles for each pre-identified predicate in the sentence. 
                     }
                 - If you are doing predicate identification + predicate disambiguation + argument identification + argument classification:
                     {

@@ -75,11 +75,10 @@ def main(test_path: str, endpoint: str):
 
     progress_bar.close()
 
-    if 'predicates' in predictions[0]:
-        predicate_identification_results = utils.evaluate_predicate_identification(labels, predictions)
-        predicate_disambiguation_results = utils.evaluate_predicate_disambiguation(labels, predictions)
-        print(utils.print_table('predicate identification', predicate_identification_results))
-        print(utils.print_table('predicate disambiguation', predicate_disambiguation_results))
+    predicate_identification_results = utils.evaluate_predicate_identification(labels, predictions)
+    predicate_disambiguation_results = utils.evaluate_predicate_disambiguation(labels, predictions)
+    print(utils.print_table('predicate identification', predicate_identification_results))
+    print(utils.print_table('predicate disambiguation', predicate_disambiguation_results))
 
     argument_identification_results = utils.evaluate_argument_identification(labels, predictions)
     argument_classification_results = utils.evaluate_argument_classification(labels, predictions)
