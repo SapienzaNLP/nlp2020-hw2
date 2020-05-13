@@ -92,18 +92,18 @@ def main(test_path: str, endpoint: str):
         predicate_disambiguation_results = utils.evaluate_predicate_disambiguation(labels, predictions_234)
         print(utils.print_table('predicate disambiguation', predicate_disambiguation_results))
 
-        argument_identification_results = utils.evaluate_argument_identification(labels, predictions)
-        argument_classification_results = utils.evaluate_argument_classification(labels, predictions)
+        argument_identification_results = utils.evaluate_argument_identification(labels, predictions_234)
+        argument_classification_results = utils.evaluate_argument_classification(labels, predictions_234)
         print(utils.print_table('argument identification', argument_identification_results))
         print(utils.print_table('argument classification', argument_classification_results))
 
     if predictions_1234:
         print('MODEL: PREDICATE IDENTIFICATION + PREDICATE DISAMBIGUATION + ARGUMENT IDENTIFICATION + ARGUMENT CLASSIFICATION')
-        predicate_disambiguation_results = utils.evaluate_predicate_disambiguation(labels, predictions_234)
+        predicate_disambiguation_results = utils.evaluate_predicate_disambiguation(labels, predictions_1234)
         print(utils.print_table('predicate disambiguation', predicate_disambiguation_results))
 
-        argument_identification_results = utils.evaluate_argument_identification(labels, predictions)
-        argument_classification_results = utils.evaluate_argument_classification(labels, predictions)
+        argument_identification_results = utils.evaluate_argument_identification(labels, predictions_1234)
+        argument_classification_results = utils.evaluate_argument_classification(labels, predictions_1234)
         print(utils.print_table('argument identification', argument_identification_results))
         print(utils.print_table('argument classification', argument_classification_results))
 
