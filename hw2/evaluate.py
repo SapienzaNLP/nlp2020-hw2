@@ -102,6 +102,8 @@ def main(test_path: str, endpoint: str):
 
     if predictions_1234:
         print('MODEL: PREDICATE IDENTIFICATION + PREDICATE DISAMBIGUATION + ARGUMENT IDENTIFICATION + ARGUMENT CLASSIFICATION')
+        predicate_identification_results = utils.evaluate_predicate_identification(labels, predictions_1234)
+        print(utils.print_table('predicate identification', predicate_identification_results))
         predicate_disambiguation_results = utils.evaluate_predicate_disambiguation(labels, predictions_1234)
         print(utils.print_table('predicate disambiguation', predicate_disambiguation_results))
 
