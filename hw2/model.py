@@ -27,7 +27,6 @@ class Model:
             A dictionary with your predictions:
                 - If you are argument identification + argument classification:
                     {
-                        "predicates": list, # The SAME list of "predicates" in the input sentence dictionary.
                         "roles": list of lists, # A list of roles for each predicate in the sentence. 
                     }
                 - If you are doing predicate disambiguation + argument identification + argument classification:
