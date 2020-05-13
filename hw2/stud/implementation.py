@@ -30,7 +30,7 @@ def build_model_234(device: str) -> Model:
             3: Argument identification.
             4: Argument classification.
     """
-    # return Baseline()
+    # return Baseline(return_predicates=True)
     raise NotImplementedError
 
 def build_model_1234(device: str) -> Model:
@@ -45,7 +45,7 @@ def build_model_1234(device: str) -> Model:
             3: Argument identification.
             4: Argument classification.
     """
-    # return Baseline()
+    # return Baseline(return_predicates=True)
     raise NotImplementedError
 
 
@@ -54,8 +54,9 @@ class Baseline(Model):
     A very simple baseline to test that the evaluation script works.
     """
 
-    def __init__(self):
+    def __init__(self, return_predicates=False):
         self.baselines = Baseline._load_baselines()
+        self.return_predicates = return_predicates
 
     def predict(self, sentence):
         predicate_identification = []
@@ -90,10 +91,13 @@ class Baseline(Model):
             else:
                 argument_classification.append(self.baselines['argument_classification'][dependency_relation])
         
-        return {
-            'predicates': predicate_disambiguation,
-            'roles': {i: argument_classification for i in predicate_indices},
-        }
+        if self.return_predicates:
+            return {
+                'predicates': predicate_disambiguation,
+                'roles': {i: argument_classification for i in predicate_indices},
+            }
+        else:
+            return {'roles': {i: argument_classification for i in predicate_indices}}
 
     @staticmethod
     def _load_baselines(path='data/baselines.json'):
