@@ -7,10 +7,46 @@ from typing import List, Tuple
 from model import Model
 
 
-def build_model(device: str) -> Model:
-    # STUDENT: return StudentModel()
-    # STUDENT: your model MUST be loaded on the device "device" indicates
+def build_model_34(device: str) -> Model:
+    """
+    The implementation of this function is MANDATORY.
+    Args:
+        device: the model MUST be loaded on the indicated device (e.g. "cpu")
+    Returns:
+        A Model instance that implements steps 3 and 4 of the SRL pipeline.
+            3: Argument identification.
+            4: Argument classification.
+    """
     return Baseline()
+
+def build_model_234(device: str) -> Model:
+    """
+    The implementation of this function is OPTIONAL.
+    Args:
+        device: the model MUST be loaded on the indicated device (e.g. "cpu")
+    Returns:
+        A Model instance that implements steps 2, 3 and 4 of the SRL pipeline.
+            2: Predicate disambiguation.
+            3: Argument identification.
+            4: Argument classification.
+    """
+    # return Baseline()
+    raise NotImplementedError
+
+def build_model_1234(device: str) -> Model:
+    """
+    The implementation of this function is OPTIONAL.
+    Args:
+        device: the model MUST be loaded on the indicated device (e.g. "cpu")
+    Returns:
+        A Model instance that implements steps 1, 2, 3 and 4 of the SRL pipeline.
+            1: Predicate identification.
+            2: Predicate disambiguation.
+            3: Argument identification.
+            4: Argument classification.
+    """
+    # return Baseline()
+    raise NotImplementedError
 
 
 class Baseline(Model):
@@ -95,7 +131,6 @@ class StudentModel(Model):
             A dictionary with your predictions:
                 - If you are argument identification + argument classification:
                     {
-                        "predicates": list, # The SAME list of "predicates" in the input sentence dictionary.
                         "roles": list of lists, # A list of roles for each predicate in the sentence. 
                     }
                 - If you are doing predicate disambiguation + argument identification + argument classification:

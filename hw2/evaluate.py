@@ -46,7 +46,7 @@ def main(test_path: str, endpoint: str):
 
         try:
             response = requests.post(endpoint, json={'data': sentences[0]}).json()
-            response['predictions']
+            response['predictions_34']
             logging.info('Connection succeded')
             break
         except ConnectionError as e:
@@ -57,7 +57,9 @@ def main(test_path: str, endpoint: str):
             logging.error(e, exc_info=True)
             exit(1)
 
-    predictions = {}
+    predictions_34 = {}
+    predictions_234 = {}
+    predictions_1234 = {}
 
     progress_bar = tqdm(total=len(sentences), desc='Evaluating')
 
@@ -65,7 +67,11 @@ def main(test_path: str, endpoint: str):
         sentence = sentences[sentence_id]
         try:
             response = requests.post(endpoint, json={'data': sentence}).json()
-            predictions[sentence_id] = response['predictions']
+            predictions_34[sentence_id] = response['predictions_34']
+            if response['prediction_234']:
+                predictions_234[sentence_id] = response['predictions_234']
+            if response['predictions_1234']:
+                predictions_1234['predictions_1234'] = response['predictions_1234']
         except KeyError as e:
             logging.error(f'Server response in wrong format')
             logging.error(f'Response was: {response}')
@@ -75,15 +81,31 @@ def main(test_path: str, endpoint: str):
 
     progress_bar.close()
 
-    predicate_identification_results = utils.evaluate_predicate_identification(labels, predictions)
-    predicate_disambiguation_results = utils.evaluate_predicate_disambiguation(labels, predictions)
-    print(utils.print_table('predicate identification', predicate_identification_results))
-    print(utils.print_table('predicate disambiguation', predicate_disambiguation_results))
-
-    argument_identification_results = utils.evaluate_argument_identification(labels, predictions)
-    argument_classification_results = utils.evaluate_argument_classification(labels, predictions)
+    print('MODEL: ARGUMENT IDENTIFICATION + ARGUMENT CLASSIFICATION')
+    argument_identification_results = utils.evaluate_argument_identification(labels, predictions_34)
+    argument_classification_results = utils.evaluate_argument_classification(labels, predictions_34)
     print(utils.print_table('argument identification', argument_identification_results))
     print(utils.print_table('argument classification', argument_classification_results))
+
+    if predictions_234:
+        print('MODEL: PREDICATE DISAMBIGUATION + ARGUMENT IDENTIFICATION + ARGUMENT CLASSIFICATION')
+        predicate_disambiguation_results = utils.evaluate_predicate_disambiguation(labels, predictions_234)
+        print(utils.print_table('predicate disambiguation', predicate_disambiguation_results))
+
+        argument_identification_results = utils.evaluate_argument_identification(labels, predictions)
+        argument_classification_results = utils.evaluate_argument_classification(labels, predictions)
+        print(utils.print_table('argument identification', argument_identification_results))
+        print(utils.print_table('argument classification', argument_classification_results))
+
+    if predictions_1234:
+        print('MODEL: PREDICATE IDENTIFICATION + PREDICATE DISAMBIGUATION + ARGUMENT IDENTIFICATION + ARGUMENT CLASSIFICATION')
+        predicate_disambiguation_results = utils.evaluate_predicate_disambiguation(labels, predictions_234)
+        print(utils.print_table('predicate disambiguation', predicate_disambiguation_results))
+
+        argument_identification_results = utils.evaluate_argument_identification(labels, predictions)
+        argument_classification_results = utils.evaluate_argument_classification(labels, predictions)
+        print(utils.print_table('argument identification', argument_identification_results))
+        print(utils.print_table('argument classification', argument_classification_results))
 
 
 if __name__ == '__main__':
