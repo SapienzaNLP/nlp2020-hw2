@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# enable exit on error
 set -e
 
 # initial check
@@ -29,6 +30,9 @@ docker ps -aq --filter "name=$image_name" | grep -q . && docker rm $image_name
 
 # build docker file
 docker build . -f Dockerfile -t $image_name
+
+# disable exit on error (error must be logged)
+set +e
 
 # bring model up
 docker run -d -p 12345:12345 --name $image_name $image_name
