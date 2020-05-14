@@ -30,8 +30,8 @@ def build_model_234(device: str) -> Model:
             3: Argument identification.
             4: Argument classification.
     """
-    return Baseline(return_predicates=True)
-    # raise NotImplementedError
+    # return Baseline(return_predicates=True)
+    raise NotImplementedError
 
 def build_model_1234(device: str) -> Model:
     """
@@ -45,8 +45,8 @@ def build_model_1234(device: str) -> Model:
             3: Argument identification.
             4: Argument classification.
     """
-    return Baseline(return_predicates=True)
-    # raise NotImplementedError
+    # return Baseline(return_predicates=True)
+    raise NotImplementedError
 
 
 class Baseline(Model):
