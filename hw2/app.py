@@ -16,6 +16,27 @@ except:
     model_1234 = None
 
 
+def prepare_data(data):
+    data_34 = data
+    data_234 = {
+        'words': data['words'],
+        'lemmas': data['lemmas'],
+        'pos_tags': data['pos_tags'],
+        'dependency_heads': data['dependency_heads'],
+        'dependency_relations': data['dependency_relations'],
+        'predicates': [1 if p != '_' else 0 for p in data['predicates']],
+    }
+    data_1234 = {
+        'words': data['words'],
+        'lemmas': data['lemmas'],
+        'pos_tags': data['pos_tags'],
+        'dependency_heads': data['dependency_heads'],
+        'dependency_relations': data['dependency_relations'],
+    }
+
+    return data_34, data_234, data_1234
+
+
 @app.route("/", defaults={"path": ""}, methods=["POST", "GET"])
 @app.route("/<path:path>", methods=["POST", "GET"])
 def annotate(path):
@@ -24,16 +45,17 @@ def annotate(path):
 
         json_body = request.json
         data = json_body['data']
+        data_34, data_234, data_1234 = prepare_data(data)
 
-        predictions_34 = model_34.predict(data)
+        predictions_34 = model_34.predict(data_34)
 
         if model_234:
-            predictions_234 = model_234.predict(data)
+            predictions_234 = model_234.predict(data_234)
         else:
             predictions_234 = None
 
         if model_1234:
-            predictions_1234 = model_1234.predict(data)
+            predictions_1234 = model_1234.predict(data_1234)
         else:
             predictions_1234 = None
 
