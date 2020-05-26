@@ -19,6 +19,7 @@ def build_model_34(device: str) -> Model:
     """
     return Baseline()
 
+
 def build_model_234(device: str) -> Model:
     """
     The implementation of this function is OPTIONAL.
@@ -32,6 +33,7 @@ def build_model_234(device: str) -> Model:
     """
     # return Baseline(return_predicates=True)
     raise NotImplementedError
+
 
 def build_model_1234(device: str) -> Model:
     """

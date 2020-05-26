@@ -6,15 +6,17 @@ WORKDIR /home/app
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
+COPY setup.py setup.py
+RUN python setup.py
 
-# copy model
+# copy model / baselines data
 
 COPY model model
+COPY data/baselines.json data/baselines.json
 
 # copy code
 
 COPY hw2 hw2
-COPY data/baselines.json data/baselines.json
 ENV PYTHONPATH hw2
 
 # standard cmd
